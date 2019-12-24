@@ -1,26 +1,23 @@
 import React from 'react';
-import logo from './logo.svg';
+import ReactDOM from 'react-dom';
+import {Formik, Form, useField} from "formik";
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export const getForm = (
+    <>
+        <h1>Choose Entity to administrate</h1>
+        <ul>
+            {createButton('Category')}
+            {createButton('Region')}
+            {createButton('Facility')}
+        </ul>
+    </>
+);
+
+function createButton(entityName) {
+    return <li><a href='#' onClick={clicked({entityName})}>{entityName}</a></li>
 }
 
-export default App;
+function clicked(entity) {
+
+}
