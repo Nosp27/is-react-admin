@@ -52,13 +52,15 @@ export function FacilityView(props) {
                 new EntityField("Facility Description", "description", AreaField),
                 new EntityField("Latitude", "lat", TextField),
                 new EntityField("Longitude", "lng", TextField),
+                new EntityField("Region", "region", SingleSelect),
                 new EntityField("Categories", "categories", MultipleSelect)
             ]}
-            msOptions={props.msOptions}
+            options={props.options}
             cls={Model.Facility}
             mappers={
                 {
-                    "categories": x => {if (x == null) return null; return {value: x, label: x.catName}}
+                    "categories": x => {if (x == null) return null; return {value: x, label: x.catName}},
+                    "region": x => {if (x == null) return null; return {value: x, label: x.regionName}}
                 }
             }
         />
@@ -116,21 +118,33 @@ function TextField(props) {
     )
 }
 
+function SingleSelect(props) {
+    props["isMulti"] = false;
+    return ConfiguredSelect(props);
+}
+
 function MultipleSelect(props) {
+    props["isMulti"] = true;
+    return ConfiguredSelect(props);
+}
+
+function ConfiguredSelect(props) {
+    const fieldId = props.fieldId;
     return (
         <>
-            <label htmlFor={props.fieldId} style={{display: "block"}}>
+            <label htmlFor={fieldId} style={{display: "block"}}>
                 {props.fieldName}
             </label>
-            <MultipleSelectComponent
+            <SelectComponent
+                isMulti={props.isMulti}
                 style={style}
                 onChange={props.formproperties.setFieldValue}
                 onBlur={props.formproperties.handleBlur}
-                options={props.misc.msOptions}
-                value={props.formproperties.values[props.fieldId]}
-                name={props.fieldId}
-                id={props.fieldId}
-                mapper={props.misc.mappers[props.fieldId]}
+                options={props.misc.options[fieldId]}
+                value={props.formproperties.values[fieldId]}
+                name={fieldId}
+                id={fieldId}
+                mapper={props.misc.mappers[fieldId]}
             />
         </>
     )
@@ -160,9 +174,15 @@ function SubmitButton() {
     return <button className="btn btn-primary" type="submit">Submit</button>
 }
 
-class MultipleSelectComponent extends React.Component {
+class SelectComponent extends React.Component {
+    getMapper(mapper) {
+        if(this.props.isMulti)
+            return x => x.map(mapper);
+        else
+            return mapper;
+    }
     handleChange = value => {
-        this.props.onChange(this.props.name, value == null ? value : value.map(x=>x.value));
+        this.props.onChange(this.props.name, value == null ? value : this.getMapper(x=>x.value)(value));
     };
 
     handleBlur = () => {
@@ -170,15 +190,18 @@ class MultipleSelectComponent extends React.Component {
     };
 
     render() {
+        let value = this.props.value;
+        if(value != null)
+            value = this.getMapper(this.props.mapper)(value);
         return (
             <div style={{margin: '1rem 0'}}>
                 <Select
                     id={this.props.name}
                     options={this.props.options.map(this.props.mapper)}
-                    isMulti={true}
+                    isMulti={this.props.isMulti}
                     onChange={this.handleChange}
                     onBlur={this.handleBlur}
-                    value={this.props.value?.map(this.props.mapper)}
+                    value={value}
                 />
                 {!!this.props.error &&
                 this.props.touched && (
@@ -216,16 +239,17 @@ export function EntityList(cls, entities, clickHandler) {
 }
 
 function EntityListComponent(props) {
-
     return (
         <>
-            <ul>
+            <ul className="list-group">
                 {
                     props.entityList.map(
                         el =>
-                            <li>
-                                <a href="#"
-                                   onClick={x => props.clickHandler.entityClickListener(props.entityCls, el)}>{props.entityToRepr(el)}</a>
+                            <li
+                                className="list-group-item list-group-item-action"
+                                onClick={x => props.clickHandler.entityClickListener(props.entityCls, el)}
+                            >
+                                {props.entityToRepr(el)}
                             </li>
                     )
                 }

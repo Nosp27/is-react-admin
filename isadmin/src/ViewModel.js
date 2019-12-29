@@ -22,22 +22,14 @@ export class ViewModel {
         {cls: _facility, read: "/facilities", write: "/facility", view: FacilityView}
     ];
 
-    mappers = {
-        0: values => values,//region
-        1: values => values,//category
-        2: values => {//facility
-            return values;
-        }
-    };
-
 
     caches = {};
 
     _connector = new ApiConnector();
 
     async init() {
-        ReactDOM.render(<Navigator onClickHandler = {this}/>, this.nav);
-        for(let i = 0; i < this.entityTypes.length; i++)
+        ReactDOM.render(<Navigator onClickHandler={this}/>, this.nav);
+        for (let i = 0; i < this.entityTypes.length; i++)
             await this._connector.read(this.entityTypes[i].read).then(x => this.caches[this.entityTypes[i].cls] = x);
     }
 
@@ -49,23 +41,33 @@ export class ViewModel {
     entityClickListener(cls, entity) {
         function getProperView(self) {
             switch (cls) {
-                case ModelEntities.Region: return <RegionView data={entity} submitHandler={self}/>;
-                case ModelEntities.Category: return <CategoryView data={entity} submitHandler={self}/>;
-                case ModelEntities.Facility: return <FacilityView data={entity} submitHandler={self} msOptions={self.caches[Model.Category]}/>;
-                default: throw `Value Error: cls ${cls}`;
+                case ModelEntities.Region:
+                    return <RegionView data={entity} submitHandler={self}/>;
+                case ModelEntities.Category:
+                    return <CategoryView data={entity} submitHandler={self}/>;
+                case ModelEntities.Facility:
+                    return (
+                        <FacilityView
+                            data={entity}
+                            submitHandler={self}
+                            options={{"categories": self.caches[Model.Category], "region": self.caches[Model.Region]}}
+                        />
+                    );
+                default:
+                    throw `Value Error: cls ${cls}`;
             }
         }
+
         ReactDOM.render(getProperView(this), this.content);
     }
 
     async submitForm(cls, values) {
-        values = this.mappers[cls](values);
         alert("res: " + JSON.stringify(values, null, 2));
     }
 
     async entitySubmitListener(cls, entity, isNew) {
         const suffix = this.entityTypes.find(x => x.cls === cls).write;
-        if(isNew)
+        if (isNew)
             await this._connector.create(suffix, entity);
         else
             await this._connector.update(suffix, entity);
@@ -74,6 +76,7 @@ export class ViewModel {
 
 class ApiConnector {
     ip = "http://localhost:8080";
+
     async requestServer(suffix, method, entity) {
         let reqProps = {
             method: method,
@@ -84,7 +87,7 @@ class ApiConnector {
         };
         if (method !== "GET" && entity !== undefined)
             reqProps["body"] = JSON.stringify(entity);
-        return (await fetch(this.ip+suffix, reqProps)).json();
+        return (await fetch(this.ip + suffix, reqProps)).json();
     }
 
 
