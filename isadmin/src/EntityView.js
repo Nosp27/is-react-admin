@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import Select from 'react-select';
 import 'react-select-css';
 import './App.css';
@@ -53,14 +54,21 @@ export function FacilityView(props) {
                 new EntityField("Latitude", "lat", TextField),
                 new EntityField("Longitude", "lng", TextField),
                 new EntityField("Region", "region", SingleSelect),
-                new EntityField("Categories", "categories", MultipleSelect)
+                new EntityField("Categories", "categories", MultipleSelect),
+                new EntityField("Image", "imageUrl", FileDragAndDrop)
             ]}
             options={props.options}
             cls={Model.Facility}
             mappers={
                 {
-                    "categories": x => {if (x == null) return null; return {value: x, label: x.catName}},
-                    "region": x => {if (x == null) return null; return {value: x, label: x.regionName}}
+                    "categories": x => {
+                        if (x == null) return null;
+                        return {value: x, label: x.catName}
+                    },
+                    "region": x => {
+                        if (x == null) return null;
+                        return {value: x, label: x.regionName}
+                    }
                 }
             }
         />
@@ -87,7 +95,12 @@ function EntityView(props) {
                 {formprops => (
                     <form onSubmit={formprops.handleSubmit}>
                         <h1 style={{marginBottom: 25}}>{props.title} #{props._id}</h1>
-                        {props.fields.map(x => x.type({fieldId: x.id, fieldName: x.name, formproperties: formprops, misc: props}))}
+                        {props.fields.map(x => x.type({
+                            fieldId: x.id,
+                            fieldName: x.name,
+                            formproperties: formprops,
+                            misc: props
+                        }))}
                         {formprops.errors.name && <div id="feedback">{formprops.errors.name}</div>}
                         <SubmitButton/>
                     </form>
@@ -170,19 +183,58 @@ function AreaField(props) {
     )
 }
 
+function FileDragAndDrop(props) {
+    const fieldId = props.fieldId;
+
+    const onChange = (e) => {
+        const input = e.target;
+        const file = input.files[0];
+        const src = file === undefined ? null : window.URL.createObjectURL(file);
+        ReactDOM.render(
+            <img
+                src={src}
+                height={100}
+                width={100}
+                hidden={document.getElementById(fieldId).files.length === 0}
+            />,
+            document.getElementById("displayImage")
+        );
+        props.formproperties.setFieldValue(fieldId, file);
+    };
+
+    return (
+        <>
+            <div>
+                <label htmlFor={fieldId} style={{display: "block"}}>
+                    {props.fieldName}
+                </label>
+                <input
+                    style={style}
+                    id={fieldId}
+                    name={fieldId}
+                    type="file"
+                    onChange={onChange}
+                />
+                <div id="displayImage"></div>
+            </div>
+        </>
+    )
+}
+
 function SubmitButton() {
     return <button className="btn btn-primary" type="submit">Submit</button>
 }
 
 class SelectComponent extends React.Component {
     getMapper(mapper) {
-        if(this.props.isMulti)
+        if (this.props.isMulti)
             return x => x.map(mapper);
         else
             return mapper;
     }
+
     handleChange = value => {
-        this.props.onChange(this.props.name, value == null ? value : this.getMapper(x=>x.value)(value));
+        this.props.onChange(this.props.name, value == null ? value : this.getMapper(x => x.value)(value));
     };
 
     handleBlur = () => {
@@ -191,7 +243,7 @@ class SelectComponent extends React.Component {
 
     render() {
         let value = this.props.value;
-        if(value != null)
+        if (value != null)
             value = this.getMapper(this.props.mapper)(value);
         return (
             <div style={{margin: '1rem 0'}}>
@@ -235,7 +287,8 @@ export function EntityList(cls, entities, clickHandler) {
         default:
             throw `Value Error in cls. Got ${cls}`;
     }
-    return <EntityListComponent entityCls={cls} entityList={entities} entityToRepr={mapping} clickHandler={clickHandler}/>;
+    return <EntityListComponent entityCls={cls} entityList={entities} entityToRepr={mapping}
+                                clickHandler={clickHandler}/>;
 }
 
 function EntityListComponent(props) {

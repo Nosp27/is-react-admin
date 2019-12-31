@@ -63,14 +63,45 @@ export class ViewModel {
 
     async submitForm(cls, values) {
         alert("res: " + JSON.stringify(values, null, 2));
+        if (values["imageUrl"]) {
+            const src = window.URL.createObjectURL(values["imageUrl"]);
+            const readFile = file => {
+                const reader = new FileReader();
+
+                reader.onload = () => {
+                    const binary = new Uint8Array(reader.result);
+                    alert(binary);
+                };
+                reader.readAsArrayBuffer(file);
+            };
+            readFile(values["imageUrl"]);
+        }
     }
 
     async entitySubmitListener(cls, entity, isNew) {
+        if(entity["imageUrl"] !== undefined && entity["imageUrl"] != null) {
+            const readFile = file => {
+                const reader = new FileReader();
+
+                reader.onload = () => {
+                    const binary = new Uint8Array(reader.result);
+                    alert(binary);
+                };
+                reader.readAsArrayBuffer(file);
+            };
+            readFile(entity["imageUrl"]);
+
+        }
+        const imageSuffix = "/image";
         const suffix = this.entityTypes.find(x => x.cls === cls).write;
         if (isNew)
             await this._connector.create(suffix, entity);
         else
             await this._connector.update(suffix, entity);
+    }
+
+    async submitImage(imageId, imageData) {
+        this._connector.post()
     }
 }
 
