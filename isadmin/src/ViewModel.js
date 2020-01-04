@@ -4,6 +4,7 @@ import {RegionView, CategoryView, FacilityView, EntityList} from "./EntityView.j
 import React from "react";
 import Navigator from "./Navigation";
 import Model from "./Model";
+import ApiConnector from "./ApiConnector";
 
 const _region = ModelEntities.Region;
 const _category = ModelEntities.Category;
@@ -17,9 +18,9 @@ export class ViewModel {
     }
 
     entityTypes = [
-        {cls: _region, read: "/regions", write: "/region", view: RegionView},
-        {cls: _category, read: "/categories", write: "/category", view: CategoryView},
-        {cls: _facility, read: "/facilities", write: "/facility", view: FacilityView}
+        {cls: _region, read: "/regions", write: "/region", id_field: "regionId", view: RegionView},
+        {cls: _category, read: "/categories", write: "/category", id_field: "catId", view: CategoryView},
+        {cls: _facility, read: "/facilities", write: "/facility", id_field: "_id", view: FacilityView}
     ];
 
 
@@ -38,7 +39,7 @@ export class ViewModel {
         ReactDOM.render(EntityList(cls, this.caches[cls], this), this.list);
     }
 
-    entityClickListener(cls, entity) {
+    entityClickListener(cls, entity) { //TODO: change image when clicked on another  elemnt
         function getProperView(self) {
             switch (cls) {
                 case ModelEntities.Region:
@@ -54,7 +55,7 @@ export class ViewModel {
                         />
                     );
                 default:
-                    throw `Value Error: cls ${cls}`;
+                    throw new Error(`Value Error: cls ${cls}`);
             }
         }
 
@@ -62,84 +63,35 @@ export class ViewModel {
     }
 
     async submitForm(cls, values) {
-        alert("res: " + JSON.stringify(values, null, 2));
-        if (values["imageUrl"]) {
-            const src = window.URL.createObjectURL(values["imageUrl"]);
-            const readFile = file => {
-                const reader = new FileReader();
-
-                reader.onload = () => {
-                    const binary = new Uint8Array(reader.result);
-                    alert(binary);
-                };
-                reader.readAsArrayBuffer(file);
-            };
-            readFile(values["imageUrl"]);
-        }
+        this.entitySubmitListener(cls, values, false);
     }
 
     async entitySubmitListener(cls, entity, isNew) {
-        if(entity["imageUrl"] !== undefined && entity["imageUrl"] != null) {
+        const typeData = this.entityTypes.find(x => x.cls === cls);
+        if (entity["imageId"] !== undefined && entity["imageId"] != null) {
             const readFile = file => {
                 const reader = new FileReader();
-
-                reader.onload = () => {
-                    const binary = new Uint8Array(reader.result);
-                    alert(binary);
-                };
                 reader.readAsArrayBuffer(file);
+                return new Uint8Array(reader.result);
             };
-            readFile(entity["imageUrl"]);
-
+            const imageBinary = readFile(entity["imageId"]);
+            const id_field_name = typeData.id_field;
+            const prototypeEntity = this.caches[cls].find(x => x[id_field_name]===entity[id_field_name]);
+            await this.submitImageAndGetId(cls, prototypeEntity[id_field_name], imageBinary)
+                .then(x => entity["imageId"] = x)
+                .then(_ => console.log("Uploaded image"));
         }
-        const imageSuffix = "/image";
-        const suffix = this.entityTypes.find(x => x.cls === cls).write;
+
+        const suffix = typeData.write;
         if (isNew)
             await this._connector.create(suffix, entity);
         else
             await this._connector.update(suffix, entity);
     }
 
-    async submitImage(imageId, imageData) {
-        this._connector.post()
-    }
-}
-
-class ApiConnector {
-    ip = "http://localhost:8080";
-
-    async requestServer(suffix, method, entity) {
-        let reqProps = {
-            method: method,
-            headers: {
-                'Access-Control-Allow-Origin': '',
-                'Content-Type': 'application/json'
-            }
-        };
-        if (method !== "GET" && entity !== undefined)
-            reqProps["body"] = JSON.stringify(entity);
-        return (await fetch(this.ip + suffix, reqProps)).json();
-    }
-
-
-    async create(suffix, entity) {
-        console.log("saving " + JSON.stringify(entity));
-        return await this.requestServer(suffix, "POST", entity);
-    }
-
-
-    async read(suffix) {
-        return await this.requestServer(suffix, "GET", null);
-    }
-
-
-    async update(suffix, entity) {
-        return await this.requestServer(suffix, "PUT", entity);
-    }
-
-
-    async deleteRequest(suffix, id) {
-        await this.requestServer(suffix + "/" + id, "DELETE");
+    async submitImageAndGetId(entityCls, entityId, imageBinary) {
+        const imageSuffix = `/image/add/for_entity/${entityCls}/${entityId}`;
+        return this._connector.create(imageSuffix, imageBinary);
     }
 }
 

@@ -13,6 +13,7 @@ export function RegionView(props) {
     return (
         <EntityView
             data={props.data}
+            id_field="regionId"
             _id={props.data.regionId}
             submitHandler={props.submitHandler}
             title="Region"
@@ -30,6 +31,7 @@ export function CategoryView(props) {
         <EntityView
             submitHandler={props.submitHandler}
             data={props.data}
+            id_field="catId"
             _id={props.data.catId}
             title="Category"
             fields={[
@@ -46,6 +48,7 @@ export function FacilityView(props) {
         <EntityView
             submitHandler={props.submitHandler}
             data={props.data}
+            id_field="_id"
             _id={props.data._id}
             title="Facility"
             fields={[
@@ -55,7 +58,7 @@ export function FacilityView(props) {
                 new EntityField("Longitude", "lng", TextField),
                 new EntityField("Region", "region", SingleSelect),
                 new EntityField("Categories", "categories", MultipleSelect),
-                new EntityField("Image", "imageUrl", FileDragAndDrop)
+                new EntityField("Image", "imageId", FileDragAndDrop)
             ]}
             options={props.options}
             cls={Model.Facility}
@@ -87,6 +90,7 @@ function EntityView(props) {
                 initialValues={entityInitialValues}
                 onSubmit={(values, actions) => {
                     setTimeout(() => {
+                        values[props.id_field] = props._id;
                         props.submitHandler.submitForm(props.cls, values);
                         actions.setSubmitting(false);
                     }, 200);
@@ -192,6 +196,7 @@ function FileDragAndDrop(props) {
         const src = file === undefined ? null : window.URL.createObjectURL(file);
         ReactDOM.render(
             <img
+                alt=""
                 src={src}
                 height={100}
                 width={100}
@@ -302,7 +307,9 @@ function EntityListComponent(props) {
                                 className="list-group-item list-group-item-action"
                                 onClick={_ => props.clickHandler.entityClickListener(props.entityCls, el)}
                             >
-                                {props.entityToRepr(el)}
+                                <a href="#">
+                                    {props.entityToRepr(el)}
+                                </a>
                             </li>
                     )
                 }
