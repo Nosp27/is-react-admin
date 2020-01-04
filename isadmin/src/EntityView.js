@@ -285,7 +285,7 @@ export function EntityList(cls, entities, clickHandler) {
             mapping = x => `${x._id}: ${x.name}`;
             break;
         default:
-            throw `Value Error in cls. Got ${cls}`;
+            throw new Error(`Value Error in cls. Got ${cls}`);
     }
     return <EntityListComponent entityCls={cls} entityList={entities} entityToRepr={mapping}
                                 clickHandler={clickHandler}/>;
@@ -300,7 +300,7 @@ function EntityListComponent(props) {
                         el =>
                             <li
                                 className="list-group-item list-group-item-action"
-                                onClick={x => props.clickHandler.entityClickListener(props.entityCls, el)}
+                                onClick={_ => props.clickHandler.entityClickListener(props.entityCls, el)}
                             >
                                 {props.entityToRepr(el)}
                             </li>

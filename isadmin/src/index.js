@@ -1,9 +1,5 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
 import './index.css';
-import Navigator from './Navigation';
 import * as serviceWorker from './serviceWorker';
-import {RegionView, FacilityView} from "./EntityView";
 import {ViewModel} from "./ViewModel";
 
 const navigationElement = document.getElementById("navigation");
