@@ -39,7 +39,7 @@ export class ViewModel {
         ReactDOM.render(EntityList(cls, this.caches[cls], this), this.list);
     }
 
-    entityClickListener(cls, entity) { //TODO: change image when clicked on another  elemnt
+    entityClickListener(cls, entity) {
         function getProperView(self) {
             switch (cls) {
                 case ModelEntities.Region:

@@ -194,22 +194,15 @@ function FileDragAndDrop(props) {
         const input = e.target;
         const file = input.files[0];
         const src = file === undefined ? null : window.URL.createObjectURL(file);
-        ReactDOM.render(
-            <img
-                alt=""
-                src={src}
-                height={100}
-                width={100}
-                hidden={document.getElementById(fieldId).files.length === 0}
-            />,
-            document.getElementById("displayImage")
-        );
+        const image = document.getElementById("displayImage");
+        image.src = src;
+        image.hidden = src == null || src === "";
         props.formproperties.setFieldValue(fieldId, file);
     };
 
     return (
         <>
-            <div>
+            <div key={props.misc.data._id}>
                 <label htmlFor={fieldId} style={{display: "block"}}>
                     {props.fieldName}
                 </label>
@@ -220,7 +213,14 @@ function FileDragAndDrop(props) {
                     type="file"
                     onChange={onChange}
                 />
-                <div id="displayImage"></div>
+                <img
+                    id={"displayImage"}
+                    alt=""
+                    src=""
+                    height={100}
+                    width={100}
+                    hidden={true}
+                />
             </div>
         </>
     )
