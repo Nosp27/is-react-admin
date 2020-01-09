@@ -193,13 +193,12 @@ function FileDragAndDrop(props) {
     const onChange = (e) => {
         const input = e.target;
         const file = input.files[0];
-        const src = file === undefined ? null : window.URL.createObjectURL(file);
+        const src = file === undefined ? props.misc.options[fieldId] : window.URL.createObjectURL(file);
         const image = document.getElementById("displayImage");
         image.src = src;
         image.hidden = src == null || src === "";
         props.formproperties.setFieldValue(fieldId, file);
     };
-
     return (
         <>
             <div key={props.misc.data._id}>
@@ -211,15 +210,16 @@ function FileDragAndDrop(props) {
                     id={fieldId}
                     name={fieldId}
                     type="file"
+                    accept={".png, .jpg"}
                     onChange={onChange}
                 />
                 <img
                     id={"displayImage"}
                     alt=""
-                    src=""
+                    src={props.misc.options[fieldId]}
                     height={100}
                     width={100}
-                    hidden={true}
+                    hidden={props.misc.options[fieldId] == null}
                 />
             </div>
         </>

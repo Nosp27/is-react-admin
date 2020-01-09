@@ -97,27 +97,44 @@ export class ViewModel {
         this.entitySubmitListener(cls, values, false);
     }
 
-    async entitySubmitListener(cls, entity, isNew) {
-        const typeData = this.entityTypes.find(x => x.cls === cls);
-        if (entity["imageId"] !== undefined && entity["imageId"] != null) {
-            const readFile = file => {
-                const reader = new FileReader();
-                reader.readAsArrayBuffer(file);
-                return new Uint8Array(reader.result);
-            };
-            const imageBinary = readFile(entity["imageId"]);
-            const id_field_name = typeData.id_field;
-            const prototypeEntity = this.caches[cls].find(x => x[id_field_name]===entity[id_field_name]);
-            await this.submitImageAndGetId(cls, prototypeEntity[id_field_name], imageBinary)
-                .then(x => entity["imageId"] = x)
-                .then(_ => console.log("Uploaded image"));
-        }
-
+    async writeEntity(isNew, entity, typeData) {
         const suffix = typeData.write;
         if (isNew)
             await this._connector.create(suffix, entity);
         else
             await this._connector.update(suffix, entity);
+    }
+
+    async entitySubmitListener(cls, entity, isNew) {
+        const typeData = this.entityTypes.find(x => x.cls === cls);
+        if (entity["imageId"] !== undefined && entity["imageId"] != null) {
+            const reader = new FileReader();
+            const self = this;
+            reader.onload = function (_) {
+                const binaryData = Array.from(new Int8Array(reader.result).values());
+                const id_field_name = typeData.id_field;
+                const prototypeEntity = self.caches[cls].find(x => x[id_field_name] === entity[id_field_name]);
+                self.submitImageAndGetId(cls, prototypeEntity[id_field_name], binaryData)
+                    .then(x => {
+                        entity["imageId"] = x;
+                        self.writeEntity(isNew, entity, typeData);
+                    })
+                    .then(_ => console.log("Uploaded image"));
+            };
+            try {
+                reader.readAsArrayBuffer(entity["imageId"]);
+            } catch (e) {
+                this.writeEntity(isNew, entity, typeData);
+            }
+        } else
+            this.writeEntity(isNew, entity, typeData);
+        this.clear();
+        ReactDOM.render(<h1>Updating</h1>, this.content);
+        setTimeout(async () => {
+                await this.init();
+                ReactDOM.render(<h1>Updates Handled</h1>, this.content);
+            }, 500
+        )
     }
 
     async submitImageAndGetId(entityCls, entityId, imageBinary) {
