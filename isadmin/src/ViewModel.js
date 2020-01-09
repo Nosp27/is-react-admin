@@ -30,6 +30,16 @@ export class ViewModel {
 
     async init() {
         ReactDOM.render(<Navigator onClickHandler={this}/>, this.nav);
+        await this.updateCaches();
+    }
+
+    clear() {
+        ReactDOM.render(null, this.nav);
+        ReactDOM.render(null, this.list);
+        ReactDOM.render(null, this.content);
+    }
+
+    async updateCaches() {
         for (let i = 0; i < this.entityTypes.length; i++)
             await this._connector.read(this.entityTypes[i].read).then(x => this.caches[this.entityTypes[i].cls] = x);
     }
@@ -39,27 +49,48 @@ export class ViewModel {
         ReactDOM.render(EntityList(cls, this.caches[cls], this), this.list);
     }
 
-    entityClickListener(cls, entity) {
-        function getProperView(self) {
-            switch (cls) {
-                case ModelEntities.Region:
-                    return <RegionView data={entity} submitHandler={self}/>;
-                case ModelEntities.Category:
-                    return <CategoryView data={entity} submitHandler={self}/>;
-                case ModelEntities.Facility:
-                    return (
-                        <FacilityView
-                            data={entity}
-                            submitHandler={self}
-                            options={{"categories": self.caches[Model.Category], "region": self.caches[Model.Region]}}
-                        />
-                    );
-                default:
-                    throw new Error(`Value Error: cls ${cls}`);
-            }
+    getProperView(cls, entity) {
+        switch (cls) {
+            case ModelEntities.Region:
+                return <RegionView data={entity} submitHandler={this}/>;
+            case ModelEntities.Category:
+                return <CategoryView data={entity} submitHandler={this}/>;
+            case ModelEntities.Facility:
+                return (
+                    <FacilityView
+                        data={entity}
+                        submitHandler={this}
+                        options={
+                            {
+                                "categories": this.caches[Model.Category],
+                                "region": this.caches[Model.Region],
+                                "imageId": this._connector.ip + "/image/" + entity.imageId
+                            }
+                        }
+                    />
+                );
+            default:
+                throw new Error(`Value Error: cls ${cls}`);
         }
+    }
 
-        ReactDOM.render(getProperView(this), this.content);
+    entityClickListener(cls, entity) {
+        ReactDOM.render(this.getProperView(cls, entity), this.content);
+    }
+
+    async addEntity(cls) {
+        const sampleEntity = {
+            name: "Sample Facility",
+            description: "Sample facility description",
+            region: null,
+            categories: null
+        };
+        let entity = undefined;
+        await this._connector
+            .create(this.entityTypes.find(x => x.cls === cls).write, sampleEntity)
+            .then(x => entity = x);
+        await this.updateCaches();
+        ReactDOM.render(this.getProperView(cls, entity), this.content);
     }
 
     async submitForm(cls, values) {

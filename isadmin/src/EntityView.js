@@ -313,6 +313,14 @@ function EntityListComponent(props) {
                             </li>
                     )
                 }
+                <li className="list-group-item list-group-item-action">
+                    <a
+                        href="#"
+                        onClick={_ => props.clickHandler.addEntity(props.entityCls)}
+                    >
+                        New
+                    </a>
+                </li>
             </ul>
         </>
     )
