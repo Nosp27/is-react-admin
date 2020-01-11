@@ -19,8 +19,10 @@ export function RegionView(props) {
             title="Region"
             fields={[
                 new EntityField("Region Name", "regionName", TextField),
-                new EntityField("Region Description", "regionDescription", AreaField)
+                new EntityField("Region Description", "regionDescription", AreaField),
+                new EntityField("Image", "imageId", FileDragAndDrop)
             ]}
+            options={props.options}
             cls={Model.Region}
         />
     )
@@ -36,8 +38,10 @@ export function CategoryView(props) {
             title="Category"
             fields={[
                 new EntityField("Category Name", "catName", TextField),
-                new EntityField("Category Description", "catDescription", AreaField)
+                new EntityField("Category Description", "catDescription", AreaField),
+                new EntityField("Image", "imageId", FileDragAndDrop)
             ]}
+            options={props.options}
             cls={Model.Category}
         />
     )

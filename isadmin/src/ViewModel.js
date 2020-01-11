@@ -52,9 +52,17 @@ export class ViewModel {
     getProperView(cls, entity) {
         switch (cls) {
             case ModelEntities.Region:
-                return <RegionView data={entity} submitHandler={this}/>;
+                return <RegionView
+                    data={entity}
+                    submitHandler={this}
+                    options={{"imageId": this._connector.ip + "/image/" + entity.imageId}}
+                />;
             case ModelEntities.Category:
-                return <CategoryView data={entity} submitHandler={this}/>;
+                return <CategoryView
+                    data={entity}
+                    submitHandler={this}
+                    options={{"imageId": this._connector.ip + "/image/" + entity.imageId}}
+                />;
             case ModelEntities.Facility:
                 return (
                     <FacilityView
