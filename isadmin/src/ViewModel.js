@@ -39,9 +39,19 @@ export class ViewModel {
         ReactDOM.render(null, this.content);
     }
 
+    setErrorMode(message) {
+        ReactDOM.render(<Navigator fine={"false"}/>, this.nav);
+        ReactDOM.render(<><h1>Error!</h1><p>{message}</p></>, this.content);
+        ReactDOM.render(null, this.list);
+    }
+
     async updateCaches() {
-        for (let i = 0; i < this.entityTypes.length; i++)
-            await this._connector.read(this.entityTypes[i].read).then(x => this.caches[this.entityTypes[i].cls] = x);
+        try {
+            for (let i = 0; i < this.entityTypes.length; i++)
+                await this._connector.read(this.entityTypes[i].read).then(x => this.caches[this.entityTypes[i].cls] = x);
+        } catch (e) {
+            this.setErrorMode(e.message);
+        }
     }
 
     navigationSelect(cls) {

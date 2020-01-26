@@ -7,13 +7,18 @@ export default class ApiConnector {
             credentials: 'include',
             redirect: 'follow',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Cookie': 'JSESSIONID=24A41FD1716947FD3B0BC1737B0F24B1'
             }
-
         };
         if (method !== "GET" && entity !== undefined)
             reqProps["body"] = JSON.stringify(entity);
-        return (await fetch(this.ip + suffix, reqProps)).text();
+        const url = this.ip + suffix;
+        try {
+            return (await fetch(url, reqProps)).json();
+        } catch (e) {
+            throw Error("Error while connecting to " + url + ": " + e);
+        }
     }
 
 
@@ -24,13 +29,7 @@ export default class ApiConnector {
 
 
     async read(suffix) {
-        try {
-            let x = await this.requestServer(suffix, "GET", null);
-            alert("Reading: " + suffix + " got " + JSON.stringify(x));
-            return x;
-        } catch (e) {
-            alert("Exception: " + e);
-        }
+        return await this.requestServer(suffix, "GET", null);
     }
 
 

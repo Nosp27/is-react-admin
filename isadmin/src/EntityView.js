@@ -300,6 +300,10 @@ export function EntityList(cls, entities, clickHandler) {
                                 clickHandler={clickHandler}/>;
 }
 
+export function ErrorNavBar() {
+
+}
+
 function EntityListComponent(props) {
     return (
         <>
