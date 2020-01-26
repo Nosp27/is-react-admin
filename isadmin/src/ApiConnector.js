@@ -4,14 +4,16 @@ export default class ApiConnector {
     async requestServer(suffix, method, entity) {
         let reqProps = {
             method: method,
+            credentials: 'include',
+            redirect: 'follow',
             headers: {
-                'Access-Control-Allow-Origin': '',
                 'Content-Type': 'application/json'
             }
+
         };
         if (method !== "GET" && entity !== undefined)
             reqProps["body"] = JSON.stringify(entity);
-        return (await fetch(this.ip + suffix, reqProps)).json();
+        return (await fetch(this.ip + suffix, reqProps)).text();
     }
 
 
@@ -22,7 +24,13 @@ export default class ApiConnector {
 
 
     async read(suffix) {
-        return await this.requestServer(suffix, "GET", null);
+        try {
+            let x = await this.requestServer(suffix, "GET", null);
+            alert("Reading: " + suffix + " got " + JSON.stringify(x));
+            return x;
+        } catch (e) {
+            alert("Exception: " + e);
+        }
     }
 
 
