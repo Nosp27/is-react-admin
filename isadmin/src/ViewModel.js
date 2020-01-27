@@ -40,7 +40,7 @@ export class ViewModel {
     }
 
     setErrorMode(message) {
-        ReactDOM.render(<Navigator fine={"false"}/>, this.nav);
+        ReactDOM.render(<Navigator fine={"false"} loginLink={this._connector.ip+"/secure_ping"}/>, this.nav);
         ReactDOM.render(<><h1>Error!</h1><p>{message}</p></>, this.content);
         ReactDOM.render(null, this.list);
     }

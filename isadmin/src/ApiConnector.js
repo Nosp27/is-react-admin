@@ -8,7 +8,6 @@ export default class ApiConnector {
             redirect: 'follow',
             headers: {
                 'Content-Type': 'application/json',
-                'Cookie': 'JSESSIONID=24A41FD1716947FD3B0BC1737B0F24B1'
             }
         };
         if (method !== "GET" && entity !== undefined)

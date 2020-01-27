@@ -8,7 +8,7 @@ export default function Navigator(props) {
             <>
                 <NavBar listItems={["Category", "Region", "Facility"]} onClickHandler={props.onClickHandler}/>
             </>
-        ) : (<><ErrorNavbar/></>);
+        ) : (<><ErrorNavbar loginLink={props.loginLink}/></>);
 }
 
 function NavBar(props) {
@@ -23,16 +23,18 @@ function NavBar(props) {
     )
 }
 
-function ErrorNavbar() {
+function ErrorNavbar(props) {
     return (
         <>
             <nav className="navbar navbar-expand-sm bg-dark navbar-dark">
                 <ul className="navbar-nav">
-                    <p
+                    <a
                         className="nav-link"
+                        href={props.loginLink}
+                        target={"_blank"}
                     >
-                        Inactive
-                    </p>
+                        Login
+                    </a>
                 </ul>
             </nav>
         </>
