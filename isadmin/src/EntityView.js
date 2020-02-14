@@ -22,6 +22,11 @@ export function RegionView(props) {
                 new EntityField("Region Description", "regionDescription", AreaField),
                 new EntityField("Area", "area", DoubleField),
                 new EntityField("Population", "population", IntegerField),
+                new EntityField("Unemployed", "unemployed", IntegerField),
+                new EntityField("Total labour force", "totalLabourForce", IntegerField),
+                new EntityField("GDP (Bln. $)", "gdp", DoubleField),
+                new EntityField("Average Property Price ($/sq.meter)", "avgPropertyPrice", DoubleField),
+                new EntityField("Average Family Income ($/month)", "avgFamilyIncome", DoubleField),
                 new EntityField("Image", "imageId", FileDragAndDrop)
             ]}
             options={props.options}
@@ -60,6 +65,9 @@ export function FacilityView(props) {
             fields={[
                 new EntityField("Facility Name", "name", TextField),
                 new EntityField("Facility Description", "description", AreaField),
+                new EntityField("Employees", "employees", IntegerField),
+                new EntityField("Investment Size", "investmentSize", DoubleField),
+                new EntityField("Profitability", "profitability", DoubleField),
                 new EntityField("Latitude", "lat", DoubleField),
                 new EntityField("Longitude", "lng", DoubleField),
                 new EntityField("Region", "region", SingleSelect),
