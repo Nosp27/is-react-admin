@@ -20,6 +20,8 @@ export function RegionView(props) {
             fields={[
                 new EntityField("Region Name", "regionName", TextField),
                 new EntityField("Region Description", "regionDescription", AreaField),
+                new EntityField("Area", "area", TextField),
+                new EntityField("Population", "population", TextField),
                 new EntityField("Image", "imageId", FileDragAndDrop)
             ]}
             options={props.options}
