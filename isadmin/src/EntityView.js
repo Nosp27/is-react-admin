@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import Select from 'react-select';
 import 'react-select-css';
 import './App.css';
-import {Formik} from "formik";
+import {Formik, Field} from "formik";
 import Entities from "./Model.js"
 import Model from "./Model";
 
@@ -20,8 +20,8 @@ export function RegionView(props) {
             fields={[
                 new EntityField("Region Name", "regionName", TextField),
                 new EntityField("Region Description", "regionDescription", AreaField),
-                new EntityField("Area", "area", TextField),
-                new EntityField("Population", "population", TextField),
+                new EntityField("Area", "area", DoubleField),
+                new EntityField("Population", "population", IntegerField),
                 new EntityField("Image", "imageId", FileDragAndDrop)
             ]}
             options={props.options}
@@ -60,8 +60,8 @@ export function FacilityView(props) {
             fields={[
                 new EntityField("Facility Name", "name", TextField),
                 new EntityField("Facility Description", "description", AreaField),
-                new EntityField("Latitude", "lat", TextField),
-                new EntityField("Longitude", "lng", TextField),
+                new EntityField("Latitude", "lat", DoubleField),
+                new EntityField("Longitude", "lng", DoubleField),
                 new EntityField("Region", "region", SingleSelect),
                 new EntityField("Categories", "categories", MultipleSelect),
                 new EntityField("Image", "imageId", FileDragAndDrop)
@@ -120,7 +120,36 @@ function EntityView(props) {
     );
 }
 
+function IntegerField(props) {
+    return getTextFieldWithVlidator(props, "Integer")
+}
+
+function DoubleField(props) {
+    return getTextFieldWithVlidator(props, "Double")
+}
+
+function getTextFieldWithVlidator(props, validationType) {
+    let validatorPredicate;
+    const isNumber = value => !isNaN(value);
+    const isInteger = value => isNumber(value) && !value.includes(".");
+    if (validationType === "Integer")
+        validatorPredicate = isInteger;
+    else if (validationType === "Double")
+        validatorPredicate = isNumber;
+    else throw Error("Not supported validation type: " + validationType);
+    return TextField(Object.assign({}, props, {"validatorPredicate": validatorPredicate}));
+}
+
 function TextField(props) {
+    function withValidation(event, handler) {
+        if (props.validatorPredicate !== undefined) {
+            if (props.validatorPredicate(event.target.value))
+                return handler(event);
+            else return;
+        }
+        return handler(event);
+    }
+
     return (
         <>
             <label htmlFor={props.fieldId} style={{display: "block"}}>
@@ -131,7 +160,7 @@ function TextField(props) {
                 className="form-control"
                 placeholder={"Enter " + props.fieldName}
                 type="text"
-                onChange={props.formproperties.handleChange}
+                onInput={event => withValidation(event, props.formproperties.handleChange)}
                 onBlur={props.formproperties.handleBlur}
                 value={props.formproperties.values[props.fieldId]}
                 name={props.fieldId}
