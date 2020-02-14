@@ -158,6 +158,8 @@ function TextField(props) {
         return handler(event);
     }
 
+    const onInputEvent = event => withValidation(event, props.formproperties.handleChange);
+
     return (
         <>
             <label htmlFor={props.fieldId} style={{display: "block"}}>
@@ -168,7 +170,8 @@ function TextField(props) {
                 className="form-control"
                 placeholder={"Enter " + props.fieldName}
                 type="text"
-                onInput={event => withValidation(event, props.formproperties.handleChange)}
+                onKeyDown={onInputEvent}
+                onChange={onInputEvent}
                 onBlur={props.formproperties.handleBlur}
                 value={props.formproperties.values[props.fieldId]}
                 name={props.fieldId}
