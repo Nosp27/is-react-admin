@@ -1,5 +1,5 @@
 export default class ApiConnector {
-    ip = "http://89.169.32.230:8080";
+    ip = "";
 
     async requestServer(suffix, method, entity) {
         let reqProps = {
