@@ -347,6 +347,9 @@ export function ErrorNavBar() {
 }
 
 function EntityListComponent(props) {
+    const textClass = {
+        color: "black"
+    };
     return (
         <>
             <ul className="list-group">
@@ -355,16 +358,33 @@ function EntityListComponent(props) {
                         el =>
                             <li
                                 className="list-group-item list-group-item-action"
-                                onClick={_ => props.clickHandler.entityClickListener(props.entityCls, el)}
                             >
-                                <a href="#">
+                                <a
+                                    onClick={_ => props.clickHandler.entityClickListener(props.entityCls, el)}
+                                    href="#"
+                                >
                                     {props.entityToRepr(el)}
                                 </a>
+                                <a className="btn dropdown-toggle"
+                                   data-toggle="dropdown">
+                                    <span className={"caret"}></span>
+                                </a>
+                                <ul className="dropdown-menu" role="menu">
+                                    <li onClick={_ => {
+                                        const answer = window.confirm("Delete " + el.name + "?");
+                                        if (answer)
+                                            props.clickHandler.entityDeleteListener(props.entityCls, el)
+                                    }}
+                                    >
+                                        <a className={textClass} href="#">Delete</a>
+                                    </li>
+                                </ul>
                             </li>
                     )
                 }
                 <li className="list-group-item list-group-item-action">
                     <a
+                        className={textClass}
                         href="#"
                         onClick={_ => props.clickHandler.addEntity(props.entityCls)}
                     >

@@ -93,14 +93,21 @@ export class ViewModel {
         }
     }
 
+    async entityDeleteListener(cls, entity) {
+        const entityInfo = this.entityTypes.find(x=>x.cls===cls);
+        await this._connector.deleteRequest(entityInfo.write, entity[entityInfo.id_field]);
+        await this.updateCaches();
+        this.navigationSelect(cls);
+    }
+
     entityClickListener(cls, entity) {
         ReactDOM.render(this.getProperView(cls, entity), this.content);
     }
 
     async addEntity(cls) {
         const sampleEntity = {
-            name: "Sample Facility",
-            description: "Sample facility description",
+            name: "Sample",
+            description: "Sample description",
             region: null,
             categories: null
         };
